@@ -18,17 +18,21 @@ struct UnrelatedData {
     float f;
 };
 
+class JFactory;
+
+// template<typename S>
+// std::vector<S*> free_get_as(JFactory* fac);
+
 template <typename T> class JFactoryT;
 
 template<typename S, typename T>
-std::vector<S*> free_get_as(JFactoryT<T>* fac) {
-    std::cout << "Free get as" << std::endl;
-}
+void free_get_as(JFactoryT<T>* in, std::Vector<S*>& out);
 
 struct JFactory {
     template<typename S>
     const std::vector<S*> get_as() {
-        return free_get_as(this);
+        std::vector<S*> results;
+        free_get_as<S>(this, results);
     }
 };
 
@@ -55,6 +59,14 @@ template <typename T> struct JFactoryT : public JFactory {
     };
 };
 
+// template<typename S>
+// std::vector<S*> free_get_as(JFactory* fac) {
+//     std::cout << "Matched untyped" << std::endl;
+// }
+template<typename S, typename T>
+std::vector<S*> free_get_as(JFactoryT<T>* fac) {
+    std::cout << "Matched TYPED" << std::endl;
+}
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
