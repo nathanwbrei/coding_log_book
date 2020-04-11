@@ -18,10 +18,12 @@ struct UnrelatedData {
     float f;
 };
 
+template <typename T> class JFactoryT;
+
 struct JFactoryVisitor {
     std::vector<BaseData*> results;
 
-    template <typename T> void visit(T* t) {
+    template <typename T> void visit(JFactoryT<T>* t) {
         std::cout << "Visiting " << typeid(T).name() << std::endl;
     }
 };
