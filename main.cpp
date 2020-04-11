@@ -20,7 +20,9 @@ struct UnrelatedData {
 
 template <typename T> class JFactoryT;
 
+
 struct JFactoryVisitor {
+
     std::vector<BaseData*> bases;
 
     template <typename T> void visit(JFactoryT<T>* t) {
@@ -38,19 +40,12 @@ struct JFactoryVisitor {
 struct JFactory {
 
     virtual void accept(JFactoryVisitor& visitor) = 0;
-// template<typename S>
-//     std::vector<S*> get_downcasted() {
-//         std::vector<S*> results;
-//         for (auto i : data) {
-//             results.push_back(i);
-//         }
-//         return results;
-//     }
 };
 
 
 template <typename T> struct JFactoryT : public JFactory {
     std::vector<T*> data;
+
 
     void accept(JFactoryVisitor& visitor) override {
         visitor.visit(this);
@@ -112,7 +107,7 @@ struct JEvent {
             auto f = p.second;
             p.second->accept(visitor);
         }
-        return results;
+        return visitor.bases;
     }
 
 };
