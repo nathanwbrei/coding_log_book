@@ -18,38 +18,15 @@ struct UnrelatedData {
     float f;
 };
 
-template <typename T> class JFactoryT;
-
-
-struct JFactoryVisitor {
-
-    std::vector<BaseData*> bases;
-
-    template <typename T> void visit(JFactoryT<T>* t) {
-
-        std::cout << "Visiting " << typeid(T).name() << std::endl;
-        if constexpr (std::is_base_of<BaseData, T>::value) {
-            auto inserts = t->template get_as<BaseData>();
-            for (auto x : inserts) {
-                bases.push_back(x);
-            }
-        }
-    }
-};
 
 struct JFactory {
 
-    virtual void accept(JFactoryVisitor& visitor) = 0;
 };
 
 
 template <typename T> struct JFactoryT : public JFactory {
+
     std::vector<T*> data;
-
-
-    void accept(JFactoryVisitor& visitor) override {
-        visitor.visit(this);
-    }
 
     void insert(T* item) {
         data.push_back(item);
