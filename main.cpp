@@ -18,11 +18,17 @@ struct UnrelatedData {
     float f;
 };
 
+template <typename T> class JFactoryT;
+
+template<typename S, typename T>
+std::vector<S*> free_get_as(JFactoryT<T>* fac) {
+    std::cout << "Free get as" << std::endl;
+}
 
 struct JFactory {
     template<typename S>
     const std::vector<S*> get_as() {
-
+        return free_get_as(this);
     }
 };
 
@@ -62,7 +68,7 @@ int main() {
 
     JFactory* factory = static_cast<JFactory*>(&fdd);
 
-    auto output = factory.get_as<BaseData>();
+    auto output = factory->get_as<BaseData>();
     for (auto item : output) {
         std::cout << item->d << std::endl;
     }
