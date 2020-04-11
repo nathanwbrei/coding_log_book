@@ -20,7 +20,10 @@ struct UnrelatedData {
 
 
 struct JFactory {
+    template<typename S>
+    const std::vector<S*> get_as() {
 
+    }
 };
 
 
