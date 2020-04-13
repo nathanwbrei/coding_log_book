@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <typeindex>
 #include <functional>
-#include <any>
 
 struct BaseData {
     double d;
@@ -13,6 +12,16 @@ struct BaseData {
 struct DerivedData : public BaseData {
     int i;
     DerivedData(double d, int i): BaseData(d), i(i) {};
+};
+
+struct DifferentBaseData {
+    double dbd;
+    DifferentBaseData(double d) : dbd(d) {};
+};
+
+struct MultipleDerivedData : public BaseData, public DifferentBaseData {
+    double mdd;
+    MultipleDerivedData(double bd, double dbd, double mdd) : BaseData(bd), DifferentBaseData(dbd), mdd(mdd) {};
 };
 
 struct UnrelatedData {
@@ -110,4 +119,22 @@ int main() {
     for (auto x: dds) {
         std::cout << "Got " << x->d << ", " << x->i << std::endl;
     }
+
+    // Test multiple (non-virtual) inheritance
+    std::cout << "Attempting multiple inheritance" << std::endl;
+    auto fmd = new JFactoryT<MultipleDerivedData>;
+    fmd->allow_cast_to<BaseData>();
+    fmd->allow_cast_to<DifferentBaseData>();
+    fmd->insert(new MultipleDerivedData(1,2,3));
+
+    for (auto x: fmd->get_as<MultipleDerivedData>()) {
+        std::cout << "Got mdd = " << x->d << ", " << x->dbd << ", " << x->mdd << std::endl;
+    }
+    for (auto x: fmd->get_as<BaseData>()) {
+        std::cout << "Got basedata = " << x->d << std::endl;
+    }
+    for (auto x: fmd->get_as<DifferentBaseData>()) {
+        std::cout << "Got differentbasedata = " << x->dbd << std::endl;
+    }
+
 }
