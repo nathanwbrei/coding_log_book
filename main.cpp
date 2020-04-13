@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
-#include <typeinfo>
 #include <typeindex>
 #include <functional>
 #include <any>
@@ -34,7 +33,7 @@ struct JFactory {
         auto ti = std::type_index(typeid(S));
         auto search = vtable.find(ti);
         if (search != vtable.end()) {
-            std::cout << "Found vtable entry!!!" << std::endl;
+            std::cout << "Found conversion to " << typeid(S).name() << std::endl;
             std::any upcast = search->second;
             auto upcast_fn = std::any_cast<std::function<std::vector<S*>()>> (upcast);
             results = upcast_fn();
@@ -51,6 +50,11 @@ template <typename T> struct JFactoryT : public JFactory {
     void insert(T* item) {
         data.push_back(item);
     }
+
+    JFactoryT() {
+        allow_cast_to<T>();
+    }
+
 
     const std::vector<T*>& get() const {
         return data;
@@ -82,30 +86,29 @@ template <typename T> struct JFactoryT : public JFactory {
 int main() {
     std::cout << "Hello, World!" << std::endl;
 
-    JFactoryT<DerivedData> fdd;
-    fdd.insert(new DerivedData {7.0, 2});
-    fdd.allow_cast_to<DerivedData>();
-    fdd.allow_cast_to<BaseData>();
+    auto fdd = new JFactoryT<DerivedData>;
+    fdd->insert(new DerivedData {7.0, 2});
+    fdd->allow_cast_to<BaseData>();
 
+    std::cout << "From DerivedData" << std::endl;
+    auto bs = fdd->get_as<BaseData>();
+    for (auto x: bs) {
+        std::cout << "Got " << x->d << std::endl;
+    }
 
-    fdd.get_as<BaseData>();
+    std::cout << "From UnrelatedData" << std::endl;
+    auto fud = new JFactoryT<UnrelatedData>;
+    fud->insert(new UnrelatedData {9.0});
+    JFactory* f = static_cast<JFactory*>(fud);
 
+    bs = f->get_as<BaseData>();
+    for (auto x: bs) {
+        std::cout << "Got " << x->d << std::endl;
+    }
 
-    //
-    // JFactoryT<UnrelatedData> fud;
-    // fud.insert(new UnrelatedData {9.0});
-    //
-    //
-    // JFactory* factory = static_cast<JFactory*>(&fdd);
-    //
-    // auto output = factory->get_as<BaseData>();
-    // for (auto item : output) {
-    //     std::cout << item->d << std::endl;
-    // }
-    //
-    // auto f = [] (int x) {return x + 1; };
-    // std::cout << f(22) << std::endl;
-    // std::any f_erased (f);
-    // auto g = std::any_cast<int(int)>(f_erased);
-    // return 0;
+    std::cout << "Get DerivedData as DerivedData" << std::endl;
+    auto dds = fdd->get_as<DerivedData>();
+    for (auto x: dds) {
+        std::cout << "Got " << x->d << ", " << x->i << std::endl;
+    }
 }
