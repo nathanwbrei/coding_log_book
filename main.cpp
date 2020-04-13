@@ -25,18 +25,17 @@ class JFactory;
 template <typename T> class JFactoryT;
 
 struct JFactory {
-    std::unordered_map<std::type_index, std::any> vtable;
+    std::unordered_map<std::type_index, void*> vtable;
 
     template<typename S>
-    const std::vector<S*> get_as() {
+    std::vector<S*> get_as() {
         std::vector<S*> results;
         auto ti = std::type_index(typeid(S));
         auto search = vtable.find(ti);
         if (search != vtable.end()) {
             std::cout << "Found conversion to " << typeid(S).name() << std::endl;
-            std::any upcast = search->second;
-            auto upcast_fn = std::any_cast<std::function<std::vector<S*>()>> (upcast);
-            results = upcast_fn();
+            auto upcast_fn = reinterpret_cast<std::function<std::vector<S*>()>*>(search->second);
+            results = (*upcast_fn)();
         }
         return results;
     }
@@ -56,7 +55,7 @@ template <typename T> struct JFactoryT : public JFactory {
     }
 
 
-    const std::vector<T*>& get() const {
+    std::vector<T*>& get() const {
         return data;
     }
 
@@ -75,9 +74,9 @@ template <typename T> struct JFactoryT : public JFactory {
             return results;
         };
 
-        auto upcast_fn = std::function<std::vector<S*>()> (upcast_lambda);
+        auto upcast_fn = new std::function<std::vector<S*>()> (upcast_lambda);
         auto key = std::type_index(typeid(S));
-        vtable[key] = std::any(upcast_fn);
+        vtable[key] = upcast_fn;
         std::cout << "Adding conversion to " << typeid(S).name() << std::endl;
     }
 };
