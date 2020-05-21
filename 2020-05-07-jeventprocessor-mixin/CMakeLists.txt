@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
-project(jes_concept)
+project(jes_mixin)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(jes_concept main.cpp)
+add_executable(jes_mixin main.cpp)
