@@ -1,0 +1,11 @@
+[user]
+	name = Nathan Brei
+	email = nbrei@jlab.org
+[core]
+	autocrlf = input
+[alias]
+    lol = log --graph --decorate --pretty=oneline --abbrev-commit
+    lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+
+
+
