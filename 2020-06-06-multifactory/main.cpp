@@ -13,6 +13,11 @@ struct Multifactory {
 		// TODO: Want a compile-time error instead
 	 	throw std::runtime_error("Not found!");
 	}
+
+	template <typename U>
+	void set(U u) {
+		throw std::runtime_error("Not found!");
+	}
 };
 
 /// Specialization for non-empty template parameters
@@ -42,6 +47,16 @@ struct Multifactory<T, Ts...> : private Multifactory<Ts...> {
 		return data;
 	}
 
+	template <typename U>
+	void set(U u) {
+		Multifactory<Ts...>::template set<U>(u);
+	}
+
+	template <>
+	void set(T t) {
+		data = t;
+	}
+
 
 
 };
@@ -52,7 +67,6 @@ int main() {
 
 	f.print();
 	f.set_all(8, 10.0, 'd');
-	f.print();
 
 	int x = f.get<int>();
 	double y = f.get<double>();
@@ -60,6 +74,10 @@ int main() {
 	//char a = f.get<float>(); // runtime error
 
 	std::cout << "Got " << x << ", " << y << ", " << z << std::endl;
+
+	f.set<double>(22.2);
+	f.print();
+
 }
 
 
