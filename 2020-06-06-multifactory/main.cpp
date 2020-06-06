@@ -22,24 +22,25 @@ struct Multifactory {
 
 /// Specialization for non-empty template parameters
 template <typename T, typename... Ts>
-struct Multifactory<T, Ts...> : private Multifactory<Ts...> {
+struct Multifactory<T, Ts...> {
 	T data;
+	Multifactory<Ts...> f;
 
-	explicit Multifactory(T t, Ts... ts) : Multifactory<Ts...>(ts...), data(t) {}
+	explicit Multifactory(T t, Ts... ts) : f(ts...), data(t) {}
 
 	void print() {
 		std::cout << data << ", ";
-		Multifactory<Ts...>::print();
+		f.print();
 	}
 
 	void set_all(T t, Ts... ts) {
 		data = t;
-		Multifactory<Ts...>::set_all(ts...);
+		f.set_all(ts...);
 	}
 
 	template <typename U>
 	U& get() {
-		return Multifactory<Ts...>::template get<U>();
+		return f.template get<U>();
 	}
 
 	template <>
@@ -49,7 +50,7 @@ struct Multifactory<T, Ts...> : private Multifactory<Ts...> {
 
 	template <typename U>
 	void set(U u) {
-		Multifactory<Ts...>::template set<U>(u);
+		f.template set<U>(u);
 	}
 
 	template <>
@@ -73,7 +74,7 @@ int main() {
 	char z = f.get<char>();
 	//char a = f.get<float>(); // runtime error
 
-	std::cout << "Got " << x << ", " << y << ", " << z << std::endl;
+	std::cout << x << ", " << y << ", " << z << std::endl;
 
 	f.set<double>(22.2);
 	f.print();
