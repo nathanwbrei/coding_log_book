@@ -16,6 +16,15 @@ struct Multifactory {
 		return std::get<std::vector<T*>>(data);
 	}
 
+	virtual void process(int event_nr, std::vector<Ts*>&... destinations) = 0;
+
+	void do_process(int event_nr) {
+		std::cout << "Calling do_process" << std::endl;
+		std::tuple<std::vector<Ts*>&...> data_refs = data;
+		auto mytuple = std::tuple_cat(std::make_tuple(this, event_nr), data_refs);
+		std::apply(&Multifactory::process, mytuple);
+	}
+
 	template <int level = 0>
 	void print() {
 		auto x = std::get<level>(data);
@@ -32,23 +41,22 @@ struct Multifactory {
 	}
 };
 
+struct MyFac : public Multifactory<int, double, char> {
+
+	void process(int event_nr, std::vector<int*>& ao, std::vector<double*>& bo, std::vector<char*>& co) override {
+		std::cout << "Calling process" << std::endl;
+		ao.push_back(new int(22));
+		co.push_back(new char('k'));
+	}
+};
 
 int main() {
 	std::cout << "Hello world from multifactory" << std::endl;
-	Multifactory<int, double, char> f;
+	MyFac f;
 
 	f.print();
-	std::vector<int*> xs = {new int(22), new int(1)};
-	std::vector<double*> ys = {new double(19.9), new double(1.0)};
-	std::vector<char*> zs = {new char('x'), new char('y')};
-	f.set(xs, ys, zs);
+	f.do_process(0);
 	f.print();
-
-	auto xss = f.get<int>();
-	auto zss = f.get<char>();
-
-	std::cout << *xss[0] << ", " << *xss[1] << "; " << *zss[0] << ", " << *zss[1] << std::endl;
-
 }
 
 
