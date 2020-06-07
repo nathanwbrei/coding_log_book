@@ -1,5 +1,20 @@
 #include <iostream>
 #include <vector>
+#include <tuple>
+
+/// Implementation of std::apply, which only becomes available in C++17
+/// Copied from
+/// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3915.pdf
+template <typename F, typename Tuple, size_t... I>
+decltype(auto) apply_impl(F&& f, Tuple&& t, std::index_sequence<I...>) {
+	return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
+}
+
+template <typename F, typename Tuple>
+decltype(auto) my_apply(F&& f, Tuple&& t) {
+	using Indices = std::make_index_sequence< std::tuple_size< std::decay_t< Tuple> >::value>;
+	return apply_impl(std::forward<F>(f), std::forward<Tuple>(t), Indices{});
+}
 
 
 template <typename... Ts>
@@ -20,10 +35,16 @@ struct Multifactory {
 
 	void do_process(int event_nr) {
 		std::cout << "Calling do_process" << std::endl;
-		std::tuple<std::vector<Ts*>&...> data_refs = data;
-		auto all_args = std::tuple_cat(std::make_tuple(this, event_nr), data_refs);
-		std::apply(&Multifactory::process, all_args);
+		using Indices = std::make_index_sequence<sizeof...(Ts)>;
+		do_process_helper(event_nr, Indices{});
 	}
+
+	template <size_t... I>
+	void do_process_helper(int event_nr, std::index_sequence<I...>) {
+		process(event_nr, std::get<I>(data)...);
+	}
+
+
 
 	template <int level = 0>
 	void print() {
@@ -57,6 +78,9 @@ int main() {
 	f.print();
 	f.do_process(0);
 	f.print();
+
+	auto ints = f.get<int>();
+	std::cout << *ints[0];
 }
 
 
