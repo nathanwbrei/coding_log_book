@@ -13,7 +13,6 @@ struct Multifactory {
 		std::cout << std::endl;
 	};
 	void set_all() {};
-	void set_everything() {};
 
 	template <typename U>
 	U& get() {
@@ -47,8 +46,7 @@ struct Multifactory<T, Ts...> {
 		f.set_all(ts...);
 	}
 
-	template <typename... Us>
-	void set_all(T* t, Us... us) {
+	void set_all(T* t, Ts*... us) {
 		data = *t;
 		f.set_all(us...);
 	}
@@ -72,12 +70,6 @@ struct Multifactory<T, Ts...> {
 	void set(T t) {
 		data = t;
 	}
-
-	void set_everything(std::vector<T*> t, std::vector<Ts*>... ts) {
-		data = *t[0];
-		f.set_everything(ts...);
-	}
-
 
 };
 
@@ -105,16 +97,6 @@ int main() {
 	char zz = 'w';
 
 	f.set_all(&xx, &yy, &zz);
-	f.print();
-
-	xx = 88;
-	yy = 33.3;
-	zz = 'z';
-	std::vector<int*> xxx = {&xx};
-	std::vector<double*> yyy = {&yy};
-	std::vector<char*> zzz = {&zz};
-
-	f.set_everything(xxx, yyy, zzz);
 	f.print();
 
 }
