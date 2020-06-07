@@ -2,20 +2,6 @@
 #include <vector>
 #include <tuple>
 
-/// Implementation of std::apply, which only becomes available in C++17
-/// Copied from
-/// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3915.pdf
-template <typename F, typename Tuple, size_t... I>
-decltype(auto) apply_impl(F&& f, Tuple&& t, std::index_sequence<I...>) {
-	return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
-}
-
-template <typename F, typename Tuple>
-decltype(auto) my_apply(F&& f, Tuple&& t) {
-	using Indices = std::make_index_sequence< std::tuple_size< std::decay_t< Tuple> >::value>;
-	return apply_impl(std::forward<F>(f), std::forward<Tuple>(t), Indices{});
-}
-
 
 template <typename... Ts>
 struct Multifactory {
@@ -35,15 +21,8 @@ struct Multifactory {
 
 	void do_process(int event_nr) {
 		std::cout << "Calling do_process" << std::endl;
-		using Indices = std::make_index_sequence<sizeof...(Ts)>;
-		do_process_helper(event_nr, Indices{});
+		process(event_nr, std::get<std::vector<Ts*>>(data)...);
 	}
-
-	template <size_t... I>
-	void do_process_helper(int event_nr, std::index_sequence<I...>) {
-		process(event_nr, std::get<I>(data)...);
-	}
-
 
 
 	template <int level = 0>
