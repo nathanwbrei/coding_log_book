@@ -21,8 +21,8 @@ struct Multifactory {
 	void do_process(int event_nr) {
 		std::cout << "Calling do_process" << std::endl;
 		std::tuple<std::vector<Ts*>&...> data_refs = data;
-		auto mytuple = std::tuple_cat(std::make_tuple(this, event_nr), data_refs);
-		std::apply(&Multifactory::process, mytuple);
+		auto all_args = std::tuple_cat(std::make_tuple(this, event_nr), data_refs);
+		std::apply(&Multifactory::process, all_args);
 	}
 
 	template <int level = 0>
