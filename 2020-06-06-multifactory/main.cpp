@@ -1,5 +1,10 @@
 #include <iostream>
 
+/// TODO:
+/// 1. Assert that the types are unique
+/// 2. Make sense of this: https://stackoverflow.com/questions/3273504/is-it-possible-to-transform-the-types-in-a-parameter-pack
+/// 3.
+
 /// Base case
 template <typename... Ts>
 struct Multifactory {
@@ -18,6 +23,7 @@ struct Multifactory {
 	void set(U u) {
 		throw std::runtime_error("Not found!");
 	}
+
 };
 
 /// Specialization for non-empty template parameters
@@ -28,6 +34,7 @@ struct Multifactory<T, Ts...> {
 
 	explicit Multifactory(T t, Ts... ts) : f(ts...), data(t) {}
 
+
 	void print() {
 		std::cout << data << ", ";
 		f.print();
@@ -36,6 +43,12 @@ struct Multifactory<T, Ts...> {
 	void set_all(T t, Ts... ts) {
 		data = t;
 		f.set_all(ts...);
+	}
+
+	template <typename... Us>
+	void set_all(T* t, Us... us) {
+		data = *t;
+		f.set_all(us...);
 	}
 
 	template <typename U>
@@ -78,6 +91,18 @@ int main() {
 
 	f.set<double>(22.2);
 	f.print();
+
+	int xx = 77;
+	double yy = 19.9;
+	char zz = 'w';
+
+	f.set_all(&xx, &yy, &zz);
+	f.print();
+
+
+
+
+
 
 }
 
