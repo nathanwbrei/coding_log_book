@@ -16,11 +16,11 @@
 /// Think of a JObject as being a row in a database table, with event number as an implicit foreign key.
 
 struct ProtoECalTrack : public JObject {
-	std::vector<ProtoECalHit*> hits;
+	std::vector<const ProtoECalHit*> hits;
 	// Store a vector of (non-owning) JObject pointers
 
     /// Make it convenient to construct one of these things
-    ProtoECalTrack(std::vector<ProtoECalHit*> hits) : hits(std::move(hits)) {}
+    ProtoECalTrack(std::vector<const ProtoECalHit*> hits) : hits(std::move(hits)) {}
 
 
     /// Override className to tell JANA to store the exact name of this class where we can

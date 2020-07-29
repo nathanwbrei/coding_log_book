@@ -12,7 +12,18 @@ int main() {
 	event->SetFactorySet(new JFactorySet());
 
 	// Create and insert input hits
+	//    +-+-+-+
+	//    |x| | |
+	//    +-+-+-+
+	//    |x| | |
+	//    +-+-+-+
+	//    |x| | |
+	//    +-+-+-+
+
 	std::vector<ProtoECalHit*> hits;
+	hits.push_back(new ProtoECalHit(0,0,1.0,1));
+	hits.push_back(new ProtoECalHit(1,0,1.0,1));
+	hits.push_back(new ProtoECalHit(2,0,1.0,1));
 	event->Insert(hits);
 
 	// Run factory

@@ -33,12 +33,13 @@ void ProtoECalTrackFactory::Process(const std::shared_ptr<const JEvent> &event) 
     /// instances only see _some_ of the events. 
     
     /// Acquire inputs (This may recursively call other JFactories)
-    // auto inputs = event->Get<...>();
-    
-    /// Do some computation
-    
+    auto hits = event->Get<ProtoECalHit>();
+
+	/// Do some computation
+	ProtoECalTrack* track = new ProtoECalTrack(hits);
+
     /// Publish outputs
-    // std::vector<ProtoECalTrack*> results;
-    // results.push_back(new ProtoECalTrack(...));
-    // Set(results);
+    std::vector<ProtoECalTrack*> results;
+    results.push_back(track);
+    Set(results);
 }
