@@ -1,5 +1,6 @@
 
 #include "TriggerDecision_Factory_Slow.h"
+#include "ProtoECalTrack.h"
 
 #include <JANA/JEvent.h>
 
@@ -27,18 +28,12 @@ void TriggerDecision_Factory_Slow::ChangeRun(const std::shared_ptr<const JEvent>
 
 void TriggerDecision_Factory_Slow::Process(const std::shared_ptr<const JEvent> &event) {
 
-    /// JFactories are local to a thread, so we are free to access and modify
-    /// member variables here. However, be aware that events are _scattered_ to
-    /// different JFactory instances, not _broadcast_: this means that JFactory 
-    /// instances only see _some_ of the events. 
-    
-    /// Acquire inputs (This may recursively call other JFactories)
-    // auto inputs = event->Get<...>();
-    
-    /// Do some computation
-    
-    /// Publish outputs
-    // std::vector<TriggerDecision*> results;
-    // results.push_back(new TriggerDecision(...));
-    // Set(results);
+    auto tracks = event->Get<ProtoECalTrack>();
+    if (tracks.empty()) {
+	    Insert(new TriggerDecision(false, "No tracks found"));
+    }
+    else {
+	    Insert(new TriggerDecision(true, "Tracks found"));
+    }
+
 }

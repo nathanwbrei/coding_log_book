@@ -55,13 +55,14 @@ void TriggerDecision_Factory_Fast::Process(const std::shared_ptr<const JEvent> &
 	}
 
 	/// Publish outputs
-	if (match_track_pattern(pixels)) {
+	if (match_track_pattern(pixels) != -1) {
 		Insert(new TriggerDecision(true, "Matched pattern"));
 	}
 	else {
 		Insert(new TriggerDecision(true, "No match found"));
 	}
 }
+
 
 int TriggerDecision_Factory_Fast::match_track_pattern(bool pixel_grid[GRID_HEIGHT][GRID_WIDTH]) {
 	//    +-+-+-+
@@ -87,11 +88,11 @@ int TriggerDecision_Factory_Fast::match_track_pattern(bool pixel_grid[GRID_HEIGH
 	                               0b001'010'001, 0b100'010'100, 0b010'100'010, 0b010'001'010};
 
 	// Return true on the first matching pattern we find
-	for (uint32_t pattern : patterns) {
-		if ((bitset & pattern) != 0) {
-			return true;
+	for (uint32_t i=0; i<13; ++i) {
+		if ((bitset & patterns[i]) != 0) {
+			return i;
 		}
 	}
-	return false;
+	return -1;
 }
 

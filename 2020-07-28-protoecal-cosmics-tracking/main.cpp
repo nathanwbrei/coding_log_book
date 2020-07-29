@@ -46,6 +46,4 @@ int main() {
 	auto res2 = ff.GetOrCreate(event, &app, 0);
 	std::cout << "TriggerDecision = " << (*res2.first)->decision << std::endl;
 
-
-
 }
