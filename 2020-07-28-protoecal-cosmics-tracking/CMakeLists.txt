@@ -12,9 +12,13 @@ set (COSMICS_DETECTOR_SOURCES
         main.cpp
         ProtoECalHit.h
         ProtoECalTrack.h
-        ProtoECalTrackFactory.cc
-        ProtoECalTrackFactory.h
-        # Add component tests here
+        ProtoECalTrack_Factory.cc
+        ProtoECalTrack_Factory.h
+        TriggerDecision.h
+        TriggerDecision_Factory_Fast.cc
+        TriggerDecision_Factory_Fast.h
+        TriggerDecision_Factory_Slow.cc
+        TriggerDecision_Factory_Slow.h
         )
 
 add_executable(proto_ecal_tracking ${COSMICS_DETECTOR_SOURCES})

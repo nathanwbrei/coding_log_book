@@ -1,9 +1,10 @@
 
-#include "ProtoECalTrackFactory.h"
+#include "TriggerDecision_Factory_Fast.h"
+#include "ProtoECalHit.h"
 
 #include <JANA/JEvent.h>
 
-void ProtoECalTrackFactory::Init() {
+void TriggerDecision_Factory_Fast::Init() {
     auto app = GetApplication();
     
     /// Acquire any parameters
@@ -16,7 +17,7 @@ void ProtoECalTrackFactory::Init() {
     // SetFactoryFlag(JFactory_Flags_t::NOT_OBJECT_OWNER);
 }
 
-void ProtoECalTrackFactory::ChangeRun(const std::shared_ptr<const JEvent> &event) {
+void TriggerDecision_Factory_Fast::ChangeRun(const std::shared_ptr<const JEvent> &event) {
     /// This is automatically run before Process, when a new run number is seen
     /// Usually we update our calibration constants by asking a JService
     /// to give us the latest data for this run number
@@ -25,23 +26,25 @@ void ProtoECalTrackFactory::ChangeRun(const std::shared_ptr<const JEvent> &event
     // m_calibration = m_service->GetCalibrationsForRun(run_nr);
 }
 
-void ProtoECalTrackFactory::Process(const std::shared_ptr<const JEvent> &event) {
+void TriggerDecision_Factory_Fast::Process(const std::shared_ptr<const JEvent> &event) {
 
     /// JFactories are local to a thread, so we are free to access and modify
     /// member variables here. However, be aware that events are _scattered_ to
     /// different JFactory instances, not _broadcast_: this means that JFactory 
-    /// instances only see _some_ of the events.
+    /// instances only see _some_ of the events. 
+    
+    /// Acquire inputs (This may recursively call other JFactories)
+    // auto inputs = event->Get<...>();
 
+	// Initialize pixel grid
+	bool pixels[GRID_HEIGHT][GRID_WIDTH];
+	for (int i=0; i<GRID_HEIGHT; ++i) {
+		for (int j=0; j<GRID_WIDTH; ++j) {
+			pixels[i][j] = false;
+		}
+	}
 
-    // Initialize pixel grid
-    bool pixels[GRID_HEIGHT][GRID_WIDTH];
-    for (int i=0; i<GRID_HEIGHT; ++i) {
-    	for (int j=0; j<GRID_WIDTH; ++j) {
-    		pixels[i][j] = false;
-    	}
-    }
-
-    // Update pixel grid with hit information
+	// Update pixel grid with hit information
 	auto hits = event->Get<ProtoECalHit>();
 	for (auto hit : hits) {
 		assert(hit->row >= 0);
@@ -51,17 +54,16 @@ void ProtoECalTrackFactory::Process(const std::shared_ptr<const JEvent> &event) 
 		pixels[hit->row][hit->col] = true;
 	}
 
-	/// Do some computation
-	ProtoECalTrack* track = new ProtoECalTrack(hits);
-
-    /// Publish outputs
-    std::vector<ProtoECalTrack*> results;
-    results.push_back(track);
-    Set(results);
+	/// Publish outputs
+	if (match_track_pattern(pixels)) {
+		Insert(new TriggerDecision(true, "Matched pattern"));
+	}
+	else {
+		Insert(new TriggerDecision(true, "No match found"));
+	}
 }
 
-
-bool ProtoECalTrackFactory::test_for_tracks(bool* pixel_grid[GRID_HEIGHT][GRID_WIDTH]) {
+int TriggerDecision_Factory_Fast::match_track_pattern(bool pixel_grid[GRID_HEIGHT][GRID_WIDTH]) {
 	//    +-+-+-+
 	//    |1|2|3|
 	//    +-+-+-+
@@ -80,9 +82,9 @@ bool ProtoECalTrackFactory::test_for_tracks(bool* pixel_grid[GRID_HEIGHT][GRID_W
 
 	// Patterns are all known ahead of time
 	const uint32_t patterns[13] = {0b100'100'100, 0b010'010'010, 0b001'001'001,  // Verticals
-							       0b100'010'001, 0b001'010'100, // Diagonals
-							       0b100'010'010, 0b010'100'100, 0b010'001'001, 0b001'010'010,
-							       0b001'010'001, 0b100'010'100, 0b010'100'010, 0b010'001'010};
+	                               0b100'010'001, 0b001'010'100, // Diagonals
+	                               0b100'010'010, 0b010'100'100, 0b010'001'001, 0b001'010'010,
+	                               0b001'010'001, 0b100'010'100, 0b010'100'010, 0b010'001'010};
 
 	// Return true on the first matching pattern we find
 	for (uint32_t pattern : patterns) {

@@ -1,7 +1,9 @@
 
 #include "ProtoECalHit.h"
 #include "ProtoECalTrack.h"
-#include "ProtoECalTrackFactory.h"
+#include "ProtoECalTrack_Factory.h"
+#include "TriggerDecision.h"
+#include "TriggerDecision_Factory_Fast.h"
 
 #include <JANA/JEvent.h>
 
@@ -28,7 +30,7 @@ int main() {
 
 	// Run factory
 	JApplication app;
-	ProtoECalTrackFactory f;
+	ProtoECalTrack_Factory f;
 	auto result = f.GetOrCreate(event, &app, 0);
 
 	// Check output tracks
@@ -39,5 +41,11 @@ int main() {
 			std::cout << "   Hit " << hit->row << ", " << hit->col << std::endl;
 		}
 	}
+
+	TriggerDecision_Factory_Fast ff;
+	auto res2 = ff.GetOrCreate(event, &app, 0);
+	std::cout << "TriggerDecision = " << (*res2.first)->decision << std::endl;
+
+
 
 }
